@@ -3,7 +3,6 @@
   "name": "GSC Regex Manager by Roberto Montaner",
   "version": "1.1",
   "description": "Guarda y gestiona regex para Search Console",
-  "homepage_url": "privacidad.html",
   "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html",
