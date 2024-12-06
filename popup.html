@@ -43,14 +43,15 @@
     <!-- Tabs -->
     <div class="tabs">
       <div class="tab" data-tab="crear">Crear</div>
-      <div class="tab active" data-tab="ver">Ver</div>
-      <div class="tab" data-tab="backup">Config</div>
+      <div class="tab" data-tab="ver">Ver</div>
+      <div class="tab" data-tab="backup">Memoria</div>
+      <div class="tab" data-tab="settings">Ajustes</div>
     </div>
 
     <!-- Crear -->
     <div id="crear">
-      <label>Dominio:</label>
-<input type="text" id="domain-input" placeholder="Ej: google.es">
+      <label>Dominio o URL:</label>
+<input type="text" id="domain-input" placeholder="Ej: test.com o https://www.test.com/">
 <datalist id="domain-list"></datalist>
 <div id="domain-suggestions" class="suggestions"></div>
 
@@ -72,7 +73,7 @@
     <div id="ver" class="active">
       <label>Dominio:</label>
       <select id="domain-select">
-        <option value="">Selecciona un dominio</option>
+        <option value="">Selecciona un dominio o directorio</option>
       </select>
       
       <label>Tipo de Búsqueda:</label>
@@ -82,23 +83,46 @@
       </select>
       
       <div id="saved-regexes"></div>
+
+      <div id="domain-account-link" class="account-selector" style="display: none;">
+        <p class="label num2222">Cuenta de Google Activa</p>
+        <div class="button-group">
+          <button class="btn btn-active" data-value="0">Primera cuenta</button>
+          <button class="btn" data-value="1">Segunda cuenta</button>
+          <button class="btn" data-value="2">Tercera cuenta</button>
+          <button class="btn" data-value="3">Cuarta cuenta</button>
+        </div>
+      </div>
+      
     </div>
 
     <!-- Backup -->
-    <div id="backup">
+    <div id="backup" class="tab-content">
       <h3>Exportar datos</h3>
       <button id="export-data" class="button button-primary">Exportar Datos</button>
-      <div style="height:20px;"></div>
+      
       <h3>Importar datos</h3>
-      <div class="grid">
+      <div>
         <input type="file" id="import-file" accept=".json">
         <button id="import-data" class="button button-primary">Importar Datos</button>
       </div>
       
       <h3>Borrar memoria</h3>
       <button id="clear-memory" class="button button-danger">Limpiar Memoria</button>
-      <p id="backup-message"></p>
-      <a href="#" id="about-link" style="display: block; margin-top: 10px; text-align: center;">Acerca de la extensión</a>
+    </div>
+    
+        
+
+    <div id="settings">
+      <h3>Ajustes</h3>
+      <label class="toggle-wrapper">
+        Activar sistema de multicuenta de Google (solo avanzados)
+        <input type="checkbox" id="enable-multiaccount" class="toggle-checkbox">
+        <span class="toggle-slider"></span>
+      </label>
+      
+      <a href="#" id="about-link" style="display: block; margin-top: 10px; text-align: center;">Acerca de la extensión</a> 
+      </div>
 
 <!-- Modal para Acerca de -->
 <div id="about-modal" class="modal">
@@ -108,7 +132,7 @@
     <p>Extensión creada por Roberto Montaner - <a href="https://www.linkedin.com/in/robertomontaner" target="_blank">Linkedin</a></p>
   </div>
 </div>
-    </div>
+    
     
 <!-- Modal Genérica -->
 <div id="modal" class="modal">

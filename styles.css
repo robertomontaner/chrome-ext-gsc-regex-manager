@@ -331,3 +331,143 @@ a:hover {
   padding: 10px;
   text-align: center;
 }
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.button-group .btn {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button-group .btn:hover {
+  background-color: #e2e6ea;
+}
+
+.button-group .btn-active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+
+/* Toggle del activar multicuenta */
+
+  /* Contenedor del toggle */
+.toggle-wrapper {
+  display: flex;
+  width: 85%;
+  align-items: center; /* Centrar verticalmente */
+  gap: 10px; /* Espacio entre el texto y el interruptor */
+  font-size: 16px; /* Tamaño del texto */
+  cursor: pointer; /* Cambiar el cursor al pasar por encima */
+}
+
+/* Ocultar el checkbox original */
+.toggle-checkbox {
+  display: none;
+}
+
+/* Estilo del toggle */
+.toggle-slider {
+  position: relative;
+  width: 40px; /* Ancho del toggle */
+  height: 20px; /* Altura del toggle */
+  background-color: #ccc; /* Color por defecto */
+  border-radius: 20px; /* Bordes redondeados */
+  transition: background-color 0.3s ease; /* Animación suave */
+}
+
+/* El círculo del toggle */
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px; /* Tamaño del círculo */
+  height: 18px;
+  background-color: white; /* Color del círculo */
+  border-radius: 50%; /* Hacerlo circular */
+  top: 1px; /* Centrar verticalmente */
+  left: 1px; /* Posición inicial */
+  transition: transform 0.3s ease; /* Animación suave */
+}
+
+/* Cuando el checkbox está activo */
+.toggle-checkbox:checked + .toggle-slider {
+  background-color: #007bff; /* Color cuando está activado */
+}
+
+/* Mover el círculo cuando está activo */
+.toggle-checkbox:checked + .toggle-slider::before {
+  transform: translateX(13px); /* Desplazamiento horizontal */
+}
+
+/* Elementos ocultos por defecto */
+#enable-multiaccount,
+#about-link,
+#domain-account-link {
+  display: none;
+}
+
+/* Contenedor principal de la selección de cuentas */
+.account-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Espaciado entre la etiqueta y la botonera */
+}
+
+/* Estilo de la etiqueta introductoria */
+.account-selector .label {
+  font-size: 14px; /* Igualar tamaño al de los botones */
+  font-weight: bold; /* Negrita */
+  color: #333; /* Color del texto */
+  text-align: left; /* Alinear a la izquierda */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  margin: 0; /* Eliminar márgenes */
+  padding-left: 10px; /* Espaciado desde el borde izquierdo */
+  margin-top: 20px;
+}
+
+
+
+/* Botonera */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Espaciado entre botones */
+}
+
+.button-group .btn {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button-group .btn:hover {
+  background-color: #e2e6ea;
+  color: #000;
+}
+
+.button-group .btn-active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.num2222{
+  margin-top: 20px;
+}
+
+

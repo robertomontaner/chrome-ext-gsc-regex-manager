@@ -1,3 +1,100 @@
+document.addEventListener('DOMContentLoaded', () => {
+  // Referencias a botones y elementos de la pestaña "Backup"
+  const importDataButton = document.getElementById('import-data');
+  const importFileInput = document.getElementById('import-file');
+  const clearMemoryButton = document.getElementById('clear-memory');
+  const exportDataButton = document.getElementById('export-data'); // Botón para exportar datos
+
+  // Botones de cierre de los modales
+  const modalCloseButtons = document.querySelectorAll('.close-modal');
+  const modalCancelButton = document.getElementById('modal-cancel');
+  const modal = document.getElementById('modal');
+
+  // Función para cerrar cualquier modal
+  function closeModal(targetModal) {
+    if (targetModal) {
+      targetModal.style.display = 'none';
+    }
+  }
+
+  // Botón "X" para cerrar modales
+  modalCloseButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      closeModal(modal);
+    });
+  });
+
+  // Botón "Cancelar" del modal genérico
+  if (modalCancelButton) {
+    modalCancelButton.addEventListener('click', () => {
+      closeModal(modal);
+    });
+  }
+
+  // Evento para "Exportar Datos"
+  if (exportDataButton) {
+    exportDataButton.addEventListener('click', () => {
+      chrome.storage.sync.get(null, (data) => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Crear un enlace para la descarga
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'regex_backup.json';
+        a.click();
+
+        URL.revokeObjectURL(url);
+        showToast('✅ Datos exportados correctamente.');
+      });
+    });
+  }
+
+  // Evento para "Importar Datos"
+  if (importDataButton) {
+    importDataButton.addEventListener('click', () => {
+      const file = importFileInput?.files[0];
+      if (!file) {
+        showModal('⚠️ Selecciona un archivo antes de importar.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          chrome.storage.sync.set(importedData, () => {
+            loadDomains();
+            loadSavedRegexes();
+            showToast('✅ Datos importados correctamente.');
+          });
+        } catch (error) {
+          showToast('❌ Error al importar datos: archivo no válido.');
+        }
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
+  // Evento para "Limpiar Memoria"
+  if (clearMemoryButton) {
+    clearMemoryButton.addEventListener('click', () => {
+      showModal('⚠️ ¿Estás seguro de que deseas borrar toda la memoria?', {
+        showConfirm: true,
+        showCancel: true,
+        onConfirm: () => {
+          chrome.storage.sync.clear(() => {
+            loadDomains();
+            loadSavedRegexes();
+            showToast('🚮 Toda la memoria fue eliminada.');
+          });
+        },
+      });
+    });
+  }
+});
+
 // popup.js
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +105,43 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.style.display = 'none';
   aboutModal.style.display = 'none';
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const buttonGroup = document.querySelector('.button-group'); // Contenedor de los botones
+
+  if (buttonGroup) {
+    buttonGroup.addEventListener('click', (event) => {
+      // Verifica si el elemento clicado es un botón
+      if (event.target.classList.contains('btn')) {
+        // Desactivar todos los botones
+        const buttons = buttonGroup.querySelectorAll('.btn');
+        buttons.forEach(button => button.classList.remove('btn-active'));
+
+        // Activar el botón seleccionado
+        event.target.classList.add('btn-active');
+
+        // Obtener el valor del botón seleccionado
+        const selectedAccount = event.target.dataset.value;
+
+        // Guardar la selección en chrome.storage.sync
+        chrome.storage.sync.set({ domainAccountMapping: selectedAccount }, () => {
+          console.log(`Cuenta seleccionada: ${selectedAccount}`);
+        });
+
+        // Acción específica para la cuenta predeterminada
+        if (selectedAccount === '0') {
+          console.log('Se ha seleccionado la cuenta predeterminada.');
+        }
+      }
+    });
+  } else {
+    console.error('El contenedor de botones ".button-group" no se encontró en el DOM.');
+  }
+});
+
+
+
 
 // Referencias a elementos HTML
 const tabs = document.querySelectorAll('.tab');
@@ -23,17 +157,78 @@ const savedRegexes = document.getElementById('saved-regexes');
 // Alternar entre pestañas
 const sections = document.querySelectorAll('div[id]');
 
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    // Remover la clase 'active' de todas las pestañas y secciones
-    tabs.forEach(t => t.classList.remove('active'));
-    sections.forEach(section => section.classList.remove('active'));
+// function updateVisibility() {
+//   const settingsTab = document.getElementById('settings'); // Contenedor Ajustes
+//   const verTab = document.getElementById('ver'); // Contenedor Ver
+//   const domainAccountLink = document.getElementById('domain-account-link'); // Botonera Multicuenta
 
-    // Agregar la clase 'active' a la pestaña y sección correspondiente
-    tab.classList.add('active');
-    const tabId = tab.dataset.tab;
-    document.getElementById(tabId).classList.add('active');
+//   // Mostrar ajustes solo en la pestaña "Ajustes"
+//   if (settingsTab && settingsTab.classList.contains('active')) {
+//     settingsTab.style.display = 'block';
+//   } else {
+//     settingsTab.style.display = 'none';
+//   }
+
+//   // Verificar si multicuenta está habilitado y la pestaña activa es "Ver"
+//   chrome.storage.sync.get(['multiaccountEnabled'], (result) => {
+//     const multiaccountEnabled = result.multiaccountEnabled || false;
+
+//     if (multiaccountEnabled && verTab && verTab.classList.contains('active')) {
+//       domainAccountLink.style.display = 'flex'; // Mostrar botonera si está en la pestaña Ver y multicuenta está activa
+//     } else {
+//       domainAccountLink.style.display = 'none'; // Ocultar en cualquier otro caso
+//     }
+//   });
+// }
+
+function updateVisibility() {
+  const settingsTab = document.getElementById('settings'); // Ajustes
+  const verTab = document.getElementById('ver'); // Ver
+
+  // Mostrar ajustes solo en la pestaña de Ajustes
+  if (settingsTab && settingsTab.classList.contains('active')) {
+    settingsTab.style.display = 'block';
+  } else {
+    settingsTab.style.display = 'none';
+  }
+}
+
+
+
+// Llamar a la función al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  updateVisibility();
+});
+
+
+// Cambiar entre pestañas
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', (event) => {
+    const selectedTab = event.target.dataset.tab;
+
+    // Quitar la clase 'active' de todas las pestañas y secciones
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#crear, #ver, #backup, #settings').forEach(section => {
+      section.classList.remove('active');
+    });
+
+    // Activar la pestaña y la sección correspondientes
+    event.target.classList.add('active');
+    document.getElementById(selectedTab).classList.add('active');
+
+    // Actualizar visibilidad según la pestaña activa
+    updateVisibility();
   });
+});
+
+// Actualizar la visibilidad al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  updateVisibility();
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateVisibility();
 });
 
 
@@ -64,15 +259,14 @@ saveButton.addEventListener('click', () => {
     });
   });
 
-  // Guardar el dominio en una lista separada
+  // Guardar el dominio o URL en una lista separada
   chrome.storage.sync.get(['domains'], (result) => {
     const domains = result.domains || [];
     if (!domains.includes(domain)) {
       domains.push(domain);
       chrome.storage.sync.set({ domains }, () => {
-        console.log("Dominio guardado correctamente:", domain);
-        loadDomains(); // Recargar dominios en la pestaña "Ver"
-        loadDomainSuggestions(); // Actualizar las sugerencias de autocompletar
+        console.log("Dominio/URL guardado correctamente:", domain);
+        loadDomains(); // Recargar dominios actualizados
       });
     }
   });
@@ -111,28 +305,66 @@ function loadSavedRegexes() {
       savedRegexes.innerHTML = '<p>No hay regex guardados para este dominio y tipo.</p>';
     } else {
       savedRegexes.innerHTML = savedData.map((regex, index) => `
-        <div>
+        <div class="regex-item">
           <p>
             Regex: <strong>${regex}</strong>
+            <button class="open-link" data-domain="${domain}" data-type="${searchType}" data-regex="${regex}">Abrir Link</button>
             <button class="edit-regex" data-index="${index}" data-key="${key}">Editar</button>
             <button class="delete-regex" data-index="${index}" data-key="${key}">Eliminar</button>
-          </p>
-          <p>
-            Ver: <a href="${generateUrl(domain, searchType, regex)}" target="_blank" style="font-weight:bold;">Link</a>
           </p>
         </div>
       `).join('');
     }
 
-    document.querySelectorAll('.delete-regex').forEach(button => {
-      button.addEventListener('click', deleteRegex);
+    // Configurar eventos de clic para los botones generados
+    document.querySelectorAll('.open-link').forEach(link => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const domain = link.dataset.domain;
+        const searchType = link.dataset.type;
+        const regex = link.dataset.regex;
+
+        generateUrl(domain, searchType, regex, (url) => {
+          if (url) {
+            window.open(url, '_blank');
+          } else {
+            console.error('No se pudo generar la URL');
+          }
+        });
+      });
     });
 
     document.querySelectorAll('.edit-regex').forEach(button => {
       button.addEventListener('click', editRegex);
     });
+    
+    document.querySelectorAll('.delete-regex').forEach(button => {
+      button.addEventListener('click', deleteRegex);
+    });
+    
   });
 }
+
+
+
+document.querySelectorAll('.open-link').forEach(link => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault(); // Evitar el comportamiento predeterminado del enlace
+
+    const domain = link.dataset.domain; // Obtener dominio del botón
+    const searchType = link.dataset.type; // Obtener tipo de búsqueda (page/query)
+    const regex = link.dataset.regex; // Obtener regex asociado
+
+    // Generar la URL y abrirla
+    generateUrl(domain, searchType, regex, (url) => {
+      if (url) {
+        window.open(url, '_blank'); // Abrir la URL generada en una nueva pestaña
+      } else {
+        console.error('No se pudo generar la URL');
+      }
+    });
+  });
+});
 
 
 // Función para eliminar regex
@@ -143,10 +375,31 @@ function deleteRegex(event) {
   chrome.storage.sync.get([key], (result) => {
     const savedData = result[key] || [];
     savedData.splice(index, 1); // Eliminar el regex de la lista
-    chrome.storage.sync.set({ [key]: savedData }, () => {
-      console.log("Regex eliminado:", savedData);
-      loadSavedRegexes(); // Recargar los regex
-    });
+
+    if (savedData.length === 0) {
+      // Si ya no hay regex, elimina la clave y verifica el dominio
+      chrome.storage.sync.remove([key], () => {
+        console.log(`Regex eliminado. La clave ${key} ha sido eliminada.`);
+        const domain = key.split('-')[0]; // Extraer el dominio de la clave
+
+        chrome.storage.sync.get(['domains'], (result) => {
+          const domains = result.domains || [];
+          const updatedDomains = domains.filter(d => d !== domain);
+
+          chrome.storage.sync.set({ domains: updatedDomains }, () => {
+            console.log(`Dominio ${domain} eliminado de la lista de dominios.`);
+            loadDomains(); // Recargar dominios actualizados
+          });
+        });
+      });
+    } else {
+      // Si aún quedan regex, actualiza la lista
+      chrome.storage.sync.set({ [key]: savedData }, () => {
+        console.log("Regex actualizado después de eliminar:", savedData);
+      });
+    }
+
+    loadSavedRegexes(); // Recargar los regex visibles
   });
 }
 
@@ -160,115 +413,48 @@ function editRegex(event) {
     const regexToEdit = savedData[index];
 
     const newRegex = prompt("Edita tu regex:", regexToEdit);
-    if (newRegex !== null) {
-      savedData[index] = newRegex; // Actualizar el regex
+    if (newRegex !== null && newRegex.trim() !== '') {
+      savedData[index] = newRegex.trim(); // Actualizar el regex
       chrome.storage.sync.set({ [key]: savedData }, () => {
         console.log("Regex editado:", savedData);
-        loadSavedRegexes(); // Recargar los regex
+        loadSavedRegexes(); // Recargar los regex visibles
       });
+    } else {
+      console.log("Edición cancelada o regex vacío.");
     }
   });
 }
-
 
 // Generar la URL de Search Console
-function generateUrl(domain, searchType, regex) {
-  const baseUrl = 'https://search.google.com/u/1/search-console/performance/search-analytics?resource_id=sc-domain%3A';
+function generateUrl(domain, searchType, regex, callback) {
+  const isUrlProperty = domain.startsWith('https://') || domain.startsWith('http://');
   const encodedDomain = encodeURIComponent(domain);
-  const encodedRegex = encodeURIComponent(`~${regex}`);
+
+  const baseUrl = isUrlProperty
+    ? `https://search.google.com/search-console/performance/search-analytics?resource_id=${encodedDomain}`
+    : `https://search.google.com/search-console/performance/search-analytics?resource_id=sc-domain%3A${encodedDomain}`;
+
+  let url = '';
   if (searchType === 'page') {
-    return `${baseUrl}${encodedDomain}&hl=es-ES&breakdown=page&page=${encodedRegex}`;
+    url = `${baseUrl}&page=~${encodeURIComponent(regex)}`;
   } else if (searchType === 'query') {
-    return `${baseUrl}${encodedDomain}&hl=es-ES&breakdown=page&query=${encodedRegex}`;
+    url = `${baseUrl}&query=~${encodeURIComponent(regex)}`;
   }
+
+  // Obtener el índice de usuario
+  chrome.storage.sync.get(['multiaccountEnabled', 'domainAccountMapping'], (result) => {
+    const accountIndex = result.multiaccountEnabled ? (result.domainAccountMapping || '0') : '0';
+
+    // Si es `u=0`, omitir el segmento `/u/0/` y `&u=0`
+    if (accountIndex === '0') {
+      callback(url); // Retornar URL sin especificar usuario
+    } else {
+      // Si es cualquier otro usuario, incluir `/u/{index}/` y `&u={index}`
+      const fullUrl = `https://search.google.com/u/${accountIndex}/search-console/performance/search-analytics?${url.split('?')[1]}&u=${accountIndex}`;
+      callback(fullUrl);
+    }
+  });
 }
-
-// importar
-document.getElementById('export-data').addEventListener('click', () => {
-  chrome.storage.sync.get(null, (data) => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    // Crear un enlace para descargar el archivo
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'regex_backup.json';
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-    // Mostrar modal al finalizar la exportación
-    showModal('✅ Datos exportados correctamente. El archivo se ha descargado.', {
-      showConfirm: true,
-      onConfirm: () => console.log('Exportación completada.')
-    });
-  });
-});
-
-
-
-//exportar
-document.getElementById('import-data').addEventListener('click', () => {
-  const fileInput = document.getElementById('import-file');
-  const file = fileInput.files[0];
-
-  if (!file) {
-    // Mostrar modal si no se seleccionó un archivo
-    showModal('⚠️ Por favor, selecciona un archivo antes de importar.', {
-      showConfirm: true,
-      onConfirm: () => console.log('Aviso de archivo faltante mostrado.')
-    });
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const importedData = JSON.parse(e.target.result);
-
-      // Guardar los datos importados
-      chrome.storage.sync.set(importedData, () => {
-        showModal('✅ Datos importados correctamente.', {
-          showConfirm: true,
-          onConfirm: () => {
-            loadDomains(); // Recargar dominios actualizados
-            console.log('Importación completada.');
-          }
-        });
-      });
-    } catch (error) {
-      // Mostrar modal en caso de error
-      showModal('❌ Error al importar datos: el archivo no es válido.', {
-        showConfirm: true,
-        onConfirm: () => console.log('Error en la importación mostrado.')
-      });
-    }
-  };
-
-  reader.readAsText(file);
-});
-
-
-// Limpiar la memoria con preaviso
-document.getElementById('clear-memory').addEventListener('click', () => {
-  showModal('⚠️ ¿Estás seguro de que deseas borrar toda la memoria? Esta acción no se puede deshacer.', {
-    showConfirm: true,
-    showCancel: true,
-    onConfirm: () => {
-      chrome.storage.sync.clear(() => {
-        console.log("Memoria limpiada.");
-        loadDomains(); // Recargar la lista de dominios vacía
-        loadSavedRegexes(); // Limpiar visualmente los regex
-
-        // Mostrar toast
-        showToast('🚮 Toda la memoria fue eliminada.');
-      });
-    },
-    onCancel: () => {
-      console.log("Limpieza de memoria cancelada.");
-    }
-  });
-});
 
 
 // Referencias al modal y sus elementos
@@ -420,4 +606,67 @@ document.addEventListener('click', (e) => {
     domainSuggestions.innerHTML = '';
     domainSuggestions.style.display = 'none'; // Ocultar contenedor
   }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const multiaccountCheckbox = document.getElementById('enable-multiaccount');
+  const domainAccountLink = document.getElementById('domain-account-link'); // Botonera
+
+  // Cargar configuración inicial desde chrome.storage.sync
+  chrome.storage.sync.get(['multiaccountEnabled'], (result) => {
+    const multiaccountEnabled = result.multiaccountEnabled || false;
+    multiaccountCheckbox.checked = multiaccountEnabled;
+    domainAccountLink.style.display = multiaccountEnabled ? 'flex' : 'none'; // Mostrar/Ocultar la botonera
+  });
+
+  // Cambiar visibilidad del sistema de multicuenta
+  multiaccountCheckbox.addEventListener('change', () => {
+    const isEnabled = multiaccountCheckbox.checked;
+
+    chrome.storage.sync.set({ multiaccountEnabled: isEnabled }, () => {
+      console.log(`Sistema de multicuenta ${isEnabled ? 'activado' : 'desactivado'}`);
+      showToast(isEnabled ? '✅ Sistema de multicuenta activado' : '🚫 Sistema de multicuenta desactivado');
+
+      // Mostrar/Ocultar la botonera según el estado
+      domainAccountLink.style.display = isEnabled ? 'flex' : 'none';
+    });
+  });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const buttonGroup = document.getElementById('domain-account-link');
+
+  // Cargar la cuenta activa desde chrome.storage.sync
+  chrome.storage.sync.get(['domainAccountMapping'], (result) => {
+    const activeAccount = result.domainAccountMapping || '0'; // Por defecto la primera cuenta
+    const buttons = buttonGroup.querySelectorAll('.btn');
+    buttons.forEach(button => {
+      if (button.dataset.value === activeAccount) {
+        button.classList.add('btn-active');
+      } else {
+        button.classList.remove('btn-active');
+      }
+    });
+  });
+
+  // Configurar eventos de clic para los botones
+  buttonGroup.addEventListener('click', (event) => {
+    if (event.target.classList.contains('btn')) {
+      const buttons = buttonGroup.querySelectorAll('.btn');
+
+      // Desactivar todos los botones
+      buttons.forEach(button => button.classList.remove('btn-active'));
+
+      // Activar el botón seleccionado
+      event.target.classList.add('btn-active');
+
+      // Guardar la selección en chrome.storage.sync
+      const selectedAccount = event.target.dataset.value;
+      chrome.storage.sync.set({ domainAccountMapping: selectedAccount }, () => {
+        console.log(`Cuenta seleccionada: ${selectedAccount}`);
+      });
+    }
+  });
 });
