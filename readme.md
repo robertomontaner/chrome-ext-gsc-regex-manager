@@ -57,7 +57,7 @@ La extensión solicita los siguientes permisos:
 
 ## 🛡️ **Política de Privacidad**
 
-Tu privacidad es importante para nosotros. Los datos se almacenan localmente en tu navegador y no se comparten con terceros. Puedes leer más en nuestra [Política de Privacidad](https://github.com/robertomontaner/chrome-ext-gsc-regex-manager/privacy-policy.html).
+Tu privacidad es importante para nosotros. Los datos se almacenan localmente en tu navegador y no se comparten con terceros. Puedes leer más en nuestra [Política de Privacidad](https://robertomontaner.github.io/chrome-ext-gsc-regex-manager/politica-privacidad.html).
 
 ---
 
@@ -76,7 +76,7 @@ Si deseas contribuir a este proyecto:
 
 ## 📩 **Contacto**
 
-¿Tienes preguntas o sugerencias? Contáctame en [LinkedIn](https://www.linkedin.com/in/robertomontaner) o envía un correo a [robertomonlle@gmail.com](mailto:robertomonlle@gmail.com).
+¿Tienes preguntas o sugerencias? Contáctame en [LinkedIn](https://www.linkedin.com/in/roberto-montaner-lled%C3%B3-726480288/) o envía un correo a [robertomonlle@gmail.com](mailto:robertomonlle@gmail.com).
 
 ---
 
